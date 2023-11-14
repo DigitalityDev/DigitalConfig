@@ -5,12 +5,14 @@ import dev.digitality.digitalconfig.DigitalConfig;
 import dev.digitality.digitalconfig.formats.ConfigFormat;
 import dev.digitality.digitalconfig.formats.JsonConfigFormat;
 import dev.digitality.digitalconfig.formats.YamlConfigFormat;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+@Getter
 public class Configuration extends ConfigurationSection {
     private final Path path;
     private final ConfigFormat format;
