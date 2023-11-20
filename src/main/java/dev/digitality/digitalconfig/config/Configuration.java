@@ -22,6 +22,17 @@ public class Configuration extends ConfigurationSection {
      * The file format will be inferred from the file extension.
      *
      * @param filePath The path to the config file.
+     * @throws IllegalArgumentException If the file extension is not supported.
+     */
+    public Configuration(String filePath) {
+        this(filePath, true);
+    }
+
+    /**
+     * This is used to instantiate a configuration file.
+     * The file format will be inferred from the file extension.
+     *
+     * @param filePath The path to the config file.
      * @param createDefault Whether to create AND load a default config file if the specified file does not exist.
      * @throws IllegalArgumentException If the file extension is not supported.
      */

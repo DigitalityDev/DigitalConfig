@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class JsonConfigFormat implements ConfigFormat {
     @Override
     public HashMap<String, Object> load(String content) {
-        return null;
+
     }
 
     @Override
