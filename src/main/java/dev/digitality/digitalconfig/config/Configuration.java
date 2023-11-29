@@ -3,8 +3,8 @@ package dev.digitality.digitalconfig.config;
 import com.google.common.io.Resources;
 import dev.digitality.digitalconfig.DigitalConfig;
 import dev.digitality.digitalconfig.formats.ConfigFormat;
-import dev.digitality.digitalconfig.formats.JsonConfigFormat;
-import dev.digitality.digitalconfig.formats.YamlConfigFormat;
+import dev.digitality.digitalconfig.formats.json.JsonConfigFormat;
+import dev.digitality.digitalconfig.formats.yaml.YamlConfigFormat;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -86,7 +86,7 @@ public class Configuration extends ConfigurationSection {
         if (path.toFile().exists()) return;
 
         try {
-            Files.createDirectories(path.getParent());
+            Files.createDirectories(path.toAbsolutePath().getParent());
             Files.createFile(path);
         } catch (IOException e) {
             DigitalConfig.LOGGER.error("Failed to create a default config at " + path + "!", e);
@@ -101,6 +101,31 @@ public class Configuration extends ConfigurationSection {
         } catch (IllegalArgumentException e) {
             if (!path.equals(Path.of(resourcePath)))
                 throw e;
+        }
+    }
+
+    /**
+     * This is used to load the configuration file.
+     */
+    public void load() {
+        try {
+            ConfigurationSection config = format.load(Files.readString(path));
+            this.setData(config.getData());
+            this.setHeaderComments(config.getHeaderComments());
+            this.setFooterComments(config.getFooterComments());
+        } catch (IOException e) {
+            DigitalConfig.LOGGER.error("Failed to load config at " + path + "!", e);
+        }
+    }
+
+    /**
+     * This is used to save the configuration file.
+     */
+    public void save() {
+        try {
+            format.save(this);
+        } catch (IOException e) {
+            DigitalConfig.LOGGER.error("Failed to save config at " + path + "!", e);
         }
     }
 }
