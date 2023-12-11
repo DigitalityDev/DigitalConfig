@@ -1,27 +1,17 @@
 package dev.digitality.digitalconfig.formats.yaml;
 
 import dev.digitality.digitalconfig.config.Configuration;
-import dev.digitality.digitalconfig.config.ConfigurationPath;
 import dev.digitality.digitalconfig.config.ConfigurationSection;
-import dev.digitality.digitalconfig.formats.ConfigFormat;
-import lombok.Cleanup;
+import dev.digitality.digitalconfig.formats.IConfigFormat;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.nodes.AnchorNode;
-import org.yaml.snakeyaml.nodes.MappingNode;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.NodeTuple;
-import org.yaml.snakeyaml.reader.UnicodeReader;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
-import java.util.Map;
 
-public class YamlConfigFormat implements ConfigFormat {
+public class YamlConfigFormat implements IConfigFormat {
     private final Yaml yaml;
 
     public YamlConfigFormat() {

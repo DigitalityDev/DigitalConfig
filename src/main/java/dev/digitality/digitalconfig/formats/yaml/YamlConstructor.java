@@ -2,16 +2,21 @@ package dev.digitality.digitalconfig.formats.yaml;
 
 import dev.digitality.digitalconfig.config.ConfigurationPath;
 import dev.digitality.digitalconfig.config.ConfigurationSection;
+import dev.digitality.digitalconfig.serialization.ConfigurationSerialization;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.*;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+
 public class YamlConstructor extends SafeConstructor {
     public YamlConstructor(LoaderOptions loaderOptions) {
         super(loaderOptions);
 
-        this.yamlConstructors.put(Tag.MAP, new ConstructConfigurationSection());
+        this.yamlConstructors.put(Tag.MAP, new ConstructMappingNode());
     }
 
     @Override
@@ -24,12 +29,31 @@ public class YamlConstructor extends SafeConstructor {
         return super.constructObject(node);
     }
 
-    private class ConstructConfigurationSection extends ConstructYamlMap {
+    private class ConstructMappingNode extends ConstructYamlMap {
         @Override
-        public ConfigurationSection construct(Node node) {
+        public Object construct(Node node) {
             if (node.isTwoStepsConstruction())
                 throw new YAMLException("Unexpected referential mapping structure. Node: " + node);
 
+            return constructSerializable(node)
+                    .orElseGet(() -> constructConfigurationSection(node));
+        }
+
+        private Optional<Object> constructSerializable(Node node) {
+            Map<?, ?> raw = (Map<?, ?>) super.construct(node);
+
+            if (!raw.containsKey(ConfigurationSerialization.SERIALIZED_KEY))
+                return Optional.empty();
+
+            Map<String, Object> typed = new LinkedHashMap<>(raw.size());
+            for (Map.Entry<?, ?> entry : raw.entrySet()) {
+                typed.put(entry.getKey().toString(), entry.getValue());
+            }
+
+            return ConfigurationSerialization.deserializeObject(typed);
+        }
+
+        private ConfigurationSection constructConfigurationSection(Node node) {
             MappingNode rootNode = (MappingNode) node;
             ConfigurationSection root = new ConfigurationSection();
             root.setHeaderComments(rootNode.getBlockComments());
@@ -46,19 +70,6 @@ public class YamlConstructor extends SafeConstructor {
                 ConfigurationPath path = new ConfigurationPath(constructObject(value), key.getBlockComments(), value instanceof ScalarNode ? value.getInLineComments() : key.getInLineComments());
                 root.set(String.valueOf(constructObject(key)), path);
             }
-
-//            if (raw.containsKey(ConfigurationSerialization.SERIALIZED_TYPE_KEY)) {
-//                Map<String, Object> typed = new LinkedHashMap<String, Object>(raw.size());
-//                for (Map.Entry<?, ?> entry : raw.entrySet()) {
-//                    typed.put(entry.getKey().toString(), entry.getValue());
-//                }
-//
-//                try {
-//                    return ConfigurationSerialization.deserializeObject(typed);
-//                } catch (IllegalArgumentException ex) {
-//                    throw new YAMLException("Could not deserialize object", ex);
-//                }
-//            }
 
             return root;
         }

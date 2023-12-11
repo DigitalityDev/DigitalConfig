@@ -1,15 +1,12 @@
 package dev.digitality.digitalconfig.formats.json;
 
 import dev.digitality.digitalconfig.config.Configuration;
-import dev.digitality.digitalconfig.config.ConfigurationPath;
 import dev.digitality.digitalconfig.config.ConfigurationSection;
-import dev.digitality.digitalconfig.formats.ConfigFormat;
+import dev.digitality.digitalconfig.formats.IConfigFormat;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
-public class JsonConfigFormat implements ConfigFormat {
+public class JsonConfigFormat implements IConfigFormat {
 
     @Override
     public ConfigurationSection load(String content) {

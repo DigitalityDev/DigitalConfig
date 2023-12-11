@@ -3,6 +3,7 @@ package dev.digitality.digitalconfig.config;
 import com.google.common.io.Resources;
 import dev.digitality.digitalconfig.DigitalConfig;
 import dev.digitality.digitalconfig.formats.ConfigFormat;
+import dev.digitality.digitalconfig.formats.IConfigFormat;
 import dev.digitality.digitalconfig.formats.json.JsonConfigFormat;
 import dev.digitality.digitalconfig.formats.yaml.YamlConfigFormat;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import java.nio.file.Path;
 @Getter
 public class Configuration extends ConfigurationSection {
     private final Path path;
-    private final ConfigFormat format;
+    private final IConfigFormat format;
 
     /**
      * This is used to instantiate a configuration file.
@@ -37,7 +38,7 @@ public class Configuration extends ConfigurationSection {
      * @throws IllegalArgumentException If the file extension is not supported.
      */
     public Configuration(String filePath, boolean createDefault) {
-        this(filePath, getFormatFromExtension(filePath.substring(filePath.lastIndexOf('.') + 1)), createDefault);
+        this(filePath, ConfigFormat.getByExtension(filePath.substring(filePath.lastIndexOf('.') + 1)), createDefault);
     }
 
     /**
@@ -47,7 +48,7 @@ public class Configuration extends ConfigurationSection {
      * @param format The format of the config file.
      * @param createDefault Whether to create AND load a default config file if the specified file does not exist.
      */
-    public Configuration(String filePath, ConfigFormat format, boolean createDefault) {
+    public Configuration(String filePath, IConfigFormat format, boolean createDefault) {
         this.path = Path.of(filePath);
         this.format = format;
 
@@ -55,15 +56,6 @@ public class Configuration extends ConfigurationSection {
             createDefault();
             load();
         }
-    }
-
-    private static ConfigFormat getFormatFromExtension(String extension) {
-        return switch (extension) {
-            case "json" -> new JsonConfigFormat();
-            case "yml", "yaml" -> new YamlConfigFormat();
-
-            default -> throw new IllegalArgumentException("Unsupported config format!");
-        };
     }
 
     /**
