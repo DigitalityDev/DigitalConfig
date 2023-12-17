@@ -42,15 +42,12 @@ public class YamlConstructor extends SafeConstructor {
         private Optional<Object> constructSerializable(Node node) {
             Map<?, ?> raw = (Map<?, ?>) super.construct(node);
 
-            if (!raw.containsKey(ConfigurationSerialization.SERIALIZED_KEY))
-                return Optional.empty();
-
             Map<String, Object> typed = new LinkedHashMap<>(raw.size());
             for (Map.Entry<?, ?> entry : raw.entrySet()) {
-                typed.put(entry.getKey().toString(), entry.getValue());
+                typed.put(String.valueOf(entry.getKey()), entry.getValue());
             }
 
-            return ConfigurationSerialization.deserializeObject(typed);
+            return ConfigurationSerialization.deserialize(typed);
         }
 
         private ConfigurationSection constructConfigurationSection(Node node) {
