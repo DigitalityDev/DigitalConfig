@@ -21,6 +21,10 @@ public class ConfigurationSection {
         data.put(path, new ConfigurationPath(value));
     }
 
+    public void get(String path) {
+        data.get(path);
+    }
+
     @Override
     public String toString() {
         return data.toString();

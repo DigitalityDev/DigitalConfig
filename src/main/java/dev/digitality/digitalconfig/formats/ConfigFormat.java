@@ -23,7 +23,7 @@ public enum ConfigFormat {
 
     public static IConfigFormat getByExtension(String extension) {
         Optional<ConfigFormat> format = Arrays.stream(ConfigFormat.values())
-                .filter(f -> f.getExtensions().contains(extension))
+                .filter(f -> f.getExtensions().contains(extension.toLowerCase()))
                 .findFirst();
 
         if (format.isEmpty())

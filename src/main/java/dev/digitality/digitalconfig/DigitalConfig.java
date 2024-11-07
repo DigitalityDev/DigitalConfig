@@ -15,6 +15,8 @@ public class DigitalConfig {
 
     public static void main(String[] args) {
         Configuration config = new Configuration("config.yml");
+        config.createDefault("config.yml");
+        config.set("kokot", "pica");
         config.save();
     }
 }

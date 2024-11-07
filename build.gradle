@@ -22,7 +22,11 @@ dependencies {
 }
 
 shadowJar {
-    minimize()
+    minimize {
+        exclude dependency("org.yaml:snakeyaml:.*")
+    }
+
+    relocate "org.yaml.snakeyaml", "dev.digitality.digitalconfig.formats.yaml.snakeyaml"
 
     archiveClassifier = null
 }
