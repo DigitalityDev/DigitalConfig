@@ -16,6 +16,10 @@ public class ConfigurationSection {
     private List<?> footerComments = new ArrayList<>();
 
     public void set(String path, ConfigurationPath value) {
+        if (value == null) {
+            value = new ConfigurationPath(null);
+        }
+
         String[] parts = path.split("\\.");
         Map<String, ConfigurationPath> currentMap = data;
 

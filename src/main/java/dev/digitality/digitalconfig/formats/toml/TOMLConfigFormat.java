@@ -1,16 +1,72 @@
 package dev.digitality.digitalconfig.formats.toml;
 
+import com.moandjiezana.toml.Toml;
+import com.moandjiezana.toml.TomlWriter;
+import dev.digitality.digitalconfig.config.ConfigurationPath;
 import dev.digitality.digitalconfig.config.ConfigurationSection;
 import dev.digitality.digitalconfig.formats.IConfigFormat;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TOMLConfigFormat implements IConfigFormat {
     @Override
     public ConfigurationSection deserialize(String content) {
-        return null;
+        Toml toml = new Toml().read(content);
+
+        return fromMap(toml.toMap());
     }
 
     @Override
     public String serialize(ConfigurationSection section) {
-        return null;
+        TomlWriter tomlWriter = new TomlWriter.Builder()
+                .indentValuesBy(0)
+                .indentTablesBy(0)
+                .padArrayDelimitersBy(0)
+                .build();
+
+        return tomlWriter.write(toMap(section));
+    }
+
+    private Map<String, Object> toMap(ConfigurationSection section) {
+        Map<String, Object> map = new LinkedHashMap<>();
+
+        for (Map.Entry<String, ConfigurationPath> entry : section.getData().entrySet()) {
+            if (entry.getValue().getData() instanceof ConfigurationSection) {
+                map.put(entry.getKey(), toMap((ConfigurationSection) entry.getValue().getData()));
+            } else {
+                map.put(entry.getKey(), entry.getValue().getData());
+            }
+        }
+
+        return map;
+    }
+
+    private ConfigurationSection fromMap(Map<String, Object> map) {
+        ConfigurationSection section = new ConfigurationSection();
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (entry.getValue() instanceof Map) {
+                section.set(entry.getKey(), fromMap((Map<String, Object>) entry.getValue()));
+            } else if (entry.getValue() instanceof Iterable) {
+                List<Object> listSection = new ArrayList<>();
+
+                for (Object item : (Iterable<?>) entry.getValue()) {
+                    if (item instanceof Map) {
+                        listSection.add(fromMap((Map<String, Object>) item));
+                    } else {
+                        listSection.add(item);
+                    }
+                }
+
+                section.set(entry.getKey(), listSection);
+            } else {
+                section.set(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return section;
     }
 }
