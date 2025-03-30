@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "dev.digitality"
-version = "1.0.0"
+version = "1.0.1"
 description = "DigitalConfig"
 
 java.sourceCompatibility = JavaLanguageVersion.of(21)
