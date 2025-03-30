@@ -34,10 +34,12 @@ public class TOMLConfigFormat implements IConfigFormat {
         Map<String, Object> map = new LinkedHashMap<>();
 
         for (Map.Entry<String, ConfigurationPath> entry : section.getData().entrySet()) {
-            if (entry.getValue().getData() instanceof ConfigurationSection) {
-                map.put(entry.getKey(), toMap((ConfigurationSection) entry.getValue().getData()));
+            Object data = entry.getValue().getData();
+
+            if (data instanceof ConfigurationSection) {
+                map.put(entry.getKey(), toMap((ConfigurationSection) data));
             } else {
-                map.put(entry.getKey(), entry.getValue().getData());
+                map.put(entry.getKey(), data);
             }
         }
 
