@@ -1,6 +1,8 @@
 package dev.digitality.digitalconfig.formats;
 
 import dev.digitality.digitalconfig.formats.json.JsonConfigFormat;
+import dev.digitality.digitalconfig.formats.properties.PropertiesConfigFormat;
+import dev.digitality.digitalconfig.formats.toml.TOMLConfigFormat;
 import dev.digitality.digitalconfig.formats.yaml.YamlConfigFormat;
 import lombok.Getter;
 
@@ -11,7 +13,9 @@ import java.util.Optional;
 @Getter
 public enum ConfigFormat {
     YAML(new YamlConfigFormat(), "yaml", "yml"),
-    JSON(new JsonConfigFormat(), "json");
+    JSON(new JsonConfigFormat(), "json"),
+    TOML(new TOMLConfigFormat(), "toml"),
+    PROPERTIES(new PropertiesConfigFormat(), "properties", "prop", "props");
 
     private final IConfigFormat format;
     private final List<String> extensions;

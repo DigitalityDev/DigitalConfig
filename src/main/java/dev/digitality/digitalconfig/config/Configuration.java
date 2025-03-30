@@ -1,17 +1,14 @@
 package dev.digitality.digitalconfig.config;
 
-import com.google.common.io.Resources;
 import dev.digitality.digitalconfig.DigitalConfig;
 import dev.digitality.digitalconfig.formats.ConfigFormat;
 import dev.digitality.digitalconfig.formats.IConfigFormat;
-import dev.digitality.digitalconfig.formats.json.JsonConfigFormat;
-import dev.digitality.digitalconfig.formats.yaml.YamlConfigFormat;
 import lombok.Cleanup;
 import lombok.Getter;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -48,6 +45,16 @@ public class Configuration extends ConfigurationSection {
      *
      * @param filePath The path to the config file.
      * @param format The format of the config file.
+     */
+    public Configuration(String filePath, IConfigFormat format) {
+        this(filePath, format, true);
+    }
+
+    /**
+     * This is used to instantiate a configuration file.
+     *
+     * @param filePath The path to the config file.
+     * @param format The format of the config file.
      * @param createEmpty Whether to create a new file if the specified file does not exist.
      */
     public Configuration(String filePath, IConfigFormat format, boolean createEmpty) {
@@ -59,7 +66,7 @@ public class Configuration extends ConfigurationSection {
                 Files.createDirectories(path.toAbsolutePath().getParent());
                 Files.createFile(path);
             } catch (IOException e) {
-                DigitalConfig.LOGGER.error("Failed to create an empty config at " + path + "!", e);
+                DigitalConfig.LOGGER.error("Failed to create an empty config at {}!", path, e);
                 return;
             }
         }
@@ -84,6 +91,9 @@ public class Configuration extends ConfigurationSection {
      * @throws IllegalArgumentException If the specified resource file does not exist.
      */
     public void createDefault(String resourcePath) {
+        if (path.toFile().exists() && path.toFile().length() > 0)
+            return;
+
         try {
             @Cleanup
             InputStream resource = DigitalConfig.class.getResourceAsStream(resourcePath);
@@ -92,7 +102,7 @@ public class Configuration extends ConfigurationSection {
 
             Files.write(path, resource.readAllBytes());
         } catch (IOException e) {
-            DigitalConfig.LOGGER.error("Failed to create a default config at " + path + "!", e);
+            DigitalConfig.LOGGER.error("Failed to create a default config at {}!", path, e);
         }
 
         load();
@@ -103,13 +113,13 @@ public class Configuration extends ConfigurationSection {
      */
     public void load() {
         try {
-            ConfigurationSection config = format.load(Files.readString(path));
+            ConfigurationSection config = format.deserialize(Files.readString(path, StandardCharsets.UTF_8));
 
             this.setData(config.getData());
             this.setHeaderComments(config.getHeaderComments());
             this.setFooterComments(config.getFooterComments());
         } catch (IOException e) {
-            DigitalConfig.LOGGER.error("Failed to load config at " + path + "!", e);
+            DigitalConfig.LOGGER.error("Failed to load config at {}!", path, e);
         }
     }
 
@@ -118,9 +128,9 @@ public class Configuration extends ConfigurationSection {
      */
     public void save() {
         try {
-            format.save(this);
+            Files.writeString(path, format.serialize(this), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            DigitalConfig.LOGGER.error("Failed to save config at " + path + "!", e);
+            DigitalConfig.LOGGER.error("Failed to save config at {}!", path, e);
         }
     }
 }

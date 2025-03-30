@@ -5,6 +5,7 @@ import dev.digitality.digitalconfig.config.ConfigurationSection;
 import dev.digitality.digitalconfig.serialization.ConfigurationSerializable;
 import dev.digitality.digitalconfig.serialization.ConfigurationSerialization;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.comments.CommentLine;
 import org.yaml.snakeyaml.nodes.*;
 import org.yaml.snakeyaml.representer.Representer;
 
@@ -38,18 +39,18 @@ public class YamlRepresenter extends Representer {
                 Node key = representObject(entry.getKey());
                 Node value = representObject(entry.getValue().getData());
 
-                key.setBlockComments(entry.getValue().getComments());
+                key.setBlockComments((List<CommentLine>) entry.getValue().getComments());
                 if (value instanceof ScalarNode)
-                    value.setInLineComments(entry.getValue().getInlineComments());
+                    value.setInLineComments((List<CommentLine>) entry.getValue().getInlineComments());
                 else
-                    key.setInLineComments(entry.getValue().getInlineComments());
+                    key.setInLineComments((List<CommentLine>) entry.getValue().getInlineComments());
 
                 nodeTuples.add(new NodeTuple(key, value));
             }
 
             MappingNode node = new MappingNode(Tag.MAP, nodeTuples, DumperOptions.FlowStyle.BLOCK);
-            node.setBlockComments(section.getHeaderComments());
-            node.setEndComments(section.getFooterComments());
+            node.setBlockComments((List<CommentLine>) section.getHeaderComments());
+            node.setEndComments((List<CommentLine>) section.getFooterComments());
 
             return node;
         }

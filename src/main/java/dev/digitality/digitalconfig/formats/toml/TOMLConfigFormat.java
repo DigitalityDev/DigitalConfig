@@ -1,9 +1,9 @@
-package dev.digitality.digitalconfig.formats.json;
+package dev.digitality.digitalconfig.formats.toml;
 
 import dev.digitality.digitalconfig.config.ConfigurationSection;
 import dev.digitality.digitalconfig.formats.IConfigFormat;
 
-public class JsonConfigFormat implements IConfigFormat {
+public class TOMLConfigFormat implements IConfigFormat {
     @Override
     public ConfigurationSection deserialize(String content) {
         return null;

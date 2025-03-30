@@ -1,24 +1,32 @@
 plugins {
     id "java-library"
-    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "maven-publish"
+    id "com.gradleup.shadow" version "8.3.6"
 }
 
 group = "dev.digitality"
 version = "1.0.0"
 description = "DigitalConfig"
 
+java.sourceCompatibility = JavaLanguageVersion.of(21)
+java.targetCompatibility = JavaLanguageVersion.of(21)
+compileJava.options.encoding = "UTF-8"
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation "org.slf4j:slf4j-api:1.7.25"
+    implementation "org.slf4j:slf4j-api:2.0.17"
     implementation "org.reflections:reflections:0.10.2"
-    implementation "com.google.guava:guava:32.1.2-jre"
-    implementation "org.yaml:snakeyaml:2.2"
 
-    compileOnly "org.projectlombok:lombok:1.18.28"
-    annotationProcessor "org.projectlombok:lombok:1.18.28"
+    implementation "org.yaml:snakeyaml:2.4"
+    implementation "com.google.code.gson:gson:2.12.1"
+    implementation "org.tomlj:tomlj:1.1.1"
+    implementation "org.codejive:java-properties:0.0.6"
+
+    compileOnly "org.projectlombok:lombok:1.18.36"
+    annotationProcessor "org.projectlombok:lombok:1.18.36"
 }
 
 shadowJar {
@@ -31,6 +39,36 @@ shadowJar {
     archiveClassifier = null
 }
 
-java.sourceCompatibility = JavaLanguageVersion.of(17)
-java.targetCompatibility = JavaLanguageVersion.of(17)
-compileJava.options.encoding = "UTF-8"
+tasks.register("sourcesJar", Jar) {
+    archiveClassifier = "sources"
+    from(sourceSets.main.allSource)
+}
+
+publishing {
+    repositories {
+        maven {
+            name "goldzoneRepoPrivate"
+            url "https://repo.gold-zone.cz/releases"
+
+            credentials {
+                username project.findProperty("goldzoneRepo.username") ?: System.getenv("GOLDZONE_REPO_USERNAME")
+                password project.findProperty("goldzoneRepo.password") ?: System.getenv("GOLDZONE_REPO_PASSWORD")
+            }
+
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+
+    publications {
+        maven(MavenPublication) { publication ->
+            groupId = this.group
+            artifactId = this.name.toLowerCase()
+            version = this.version
+            artifact(tasks.sourcesJar)
+
+            from(components.shadow)
+        }
+    }
+}
