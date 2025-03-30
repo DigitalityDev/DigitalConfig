@@ -15,6 +15,10 @@ public class ConfigurationSection {
     private List<?> headerComments = new ArrayList<>();
     private List<?> footerComments = new ArrayList<>();
 
+    public List<String> getKeys() {
+        return new ArrayList<>(data.keySet());
+    }
+
     public void set(String path, ConfigurationPath value) {
         if (value == null) {
             value = new ConfigurationPath(null);
@@ -72,6 +76,10 @@ public class ConfigurationSection {
         }
 
         return type.cast(data);
+    }
+
+    public ConfigurationSection getSection(String path) {
+        return get(path, ConfigurationSection.class);
     }
 
     public String getString(String path) {
