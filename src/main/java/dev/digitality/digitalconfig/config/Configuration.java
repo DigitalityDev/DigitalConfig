@@ -96,7 +96,7 @@ public class Configuration extends ConfigurationSection {
 
         try {
             @Cleanup
-            InputStream resource = DigitalConfig.class.getResourceAsStream(resourcePath);
+            InputStream resource = DigitalConfig.class.getResourceAsStream("/" + resourcePath);
             if (resource == null)
                 throw new IllegalArgumentException("Resource file at " + resourcePath + " does not exist!");
 
