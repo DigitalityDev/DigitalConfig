@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "dev.digitality"
-version = "1.0.1"
+version = "1.0.2"
 description = "DigitalConfig"
 
 java.sourceCompatibility = JavaLanguageVersion.of(21)
@@ -35,6 +35,9 @@ shadowJar {
     }
 
     relocate "org.yaml.snakeyaml", "dev.digitality.digitalconfig.formats.yaml.snakeyaml"
+    relocate "com.google.gson", "dev.digitality.digitalconfig.formats.json.gson"
+    relocate "org.codejive.properties", "dev.digitality.digitalconfig.formats.properties.java_properties"
+    relocate "com.moandjiezana.toml", "dev.digitality.digitalconfig.formats.toml.toml4j"
 
     archiveClassifier = null
 }

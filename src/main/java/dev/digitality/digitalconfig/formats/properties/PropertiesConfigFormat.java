@@ -19,9 +19,10 @@ public class PropertiesConfigFormat implements IConfigFormat {
         ConfigurationSection section = new ConfigurationSection();
 
         for (String key : properties.stringPropertyNames()) {
-            String value = properties.getProperty(key);
+            ConfigurationPath path = new ConfigurationPath(properties.getProperty(key));
+            path.getMetadata().put("properties.comments", properties.getComment(key));
 
-            section.getData().put(key, new ConfigurationPath(value, properties.getPropertyComment(key), null));
+            section.getData().put(key, path);
         }
 
         return section;
@@ -36,12 +37,10 @@ public class PropertiesConfigFormat implements IConfigFormat {
             ConfigurationPath value = entry.getValue();
 
             properties.setProperty(key, String.valueOf(value.getData()));
-            if (value.getComments() != null) {
-                properties.setComment(key, (List<String>) value.getComments());
+            if (value.getMetadata().containsKey("properties.comments")) {
+                properties.setComment(key, (List<String>) value.getMetadata().get("properties.comments"));
             }
         }
-
-        System.out.println(properties.getComment("eula"));
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));

@@ -1,23 +1,16 @@
 package dev.digitality.digitalconfig.config;
 
+import dev.digitality.digitalconfig.DigitalConfig;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Getter
 @Setter
 public class ConfigurationSection {
     private Map<String, ConfigurationPath> data = new LinkedHashMap<>();
-    private List<?> headerComments = new ArrayList<>();
-    private List<?> footerComments = new ArrayList<>();
-
-    public List<String> getKeys() {
-        return new ArrayList<>(data.keySet());
-    }
+    private Map<String, List<?>> metadata = new HashMap<>();
 
     public void set(String path, ConfigurationPath value) {
         if (value == null) {
@@ -51,31 +44,56 @@ public class ConfigurationSection {
         set(path, new ConfigurationPath(value));
     }
 
-    public <T> T get(String path, Class<T> type) {
-        String[] parts = path.split("\\.");
-        Map<String, ConfigurationPath> currentMap = data;
-
-        for (int i = 0; i < parts.length - 1; i++) {
-            Object data = currentMap.get(parts[i]).getData();
-
-            if (!(data instanceof ConfigurationSection section)) {
-                throw new IllegalArgumentException("Section %s of path %s is not a valid configuration section.".formatted(parts[i], path));
-            }
-
-            currentMap = section.getData();
+    private <T> T get(String fullPath, String path, Class<T> type, Map<String, ConfigurationPath> currentMap) {
+        if (currentMap.containsKey(path)) {
+            return castData(fullPath, path, currentMap.get(path).getData(), type);
         }
 
-        Object data = currentMap.get(parts[parts.length - 1]).getData();
+        String[] parts = path.split("\\.");
+        StringBuilder keyBuilder = new StringBuilder();
 
+        for (int i = 0; i < parts.length; i++) {
+            if (i > 0) keyBuilder.append(".");
+            keyBuilder.append(parts[i]);
+
+            String currentKey = keyBuilder.toString();
+
+            if (currentMap.containsKey(currentKey)) {
+                Object data = currentMap.get(currentKey).getData();
+
+                if (path.length() == currentKey.length()) {
+                    return type.cast(data);
+                }
+
+                if (data instanceof ConfigurationSection section) {
+                    return get(
+                            fullPath,
+                            path.substring(currentKey.length() + 1),
+                            type,
+                            section.getData()
+                    );
+                }
+            }
+        }
+
+        DigitalConfig.LOGGER.error("Section %s was not found in path %s.".formatted(path, fullPath));
+        return null;
+    }
+
+    private <T> T castData(String fullPath, String path, Object data, Class<T> type) {
         if (data == null) {
             return null;
         }
 
-        if (!type.isInstance(data)) {
-            throw new IllegalArgumentException("Value at path %s is not of type %s.".formatted(path, type.getName()));
+        if (type.isInstance(data)) {
+            return type.cast(data);
         }
 
-        return type.cast(data);
+        throw new IllegalArgumentException("Value %s at path %s is of type %s, not %s.".formatted(path, fullPath, data.getClass().getName(), type.getName()));
+    }
+
+    public <T> T get(String path, Class<T> type) {
+        return get(path, path, type, data);
     }
 
     public ConfigurationSection getSection(String path) {
@@ -109,11 +127,15 @@ public class ConfigurationSection {
     public List<String> getStringList(String path) {
         List<?> data = get(path, List.class);
 
-        if (data != null && !data.isEmpty() && data.get(0) instanceof String) {
+        if (data != null && !data.isEmpty() && data.getFirst() instanceof String) {
             return (List<String>) data;
         }
 
         throw new IllegalArgumentException("Value at path %s is not of type List<String>.".formatted(path));
+    }
+
+    public List<String> getKeys() {
+        return new ArrayList<>(data.keySet());
     }
 
     @Override

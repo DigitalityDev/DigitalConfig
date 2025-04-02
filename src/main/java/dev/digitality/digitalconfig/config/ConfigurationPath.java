@@ -2,24 +2,16 @@ package dev.digitality.digitalconfig.config;
 
 import lombok.Data;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class ConfigurationPath {
     private Object data;
-    private List<?> comments;
-    private List<?> inlineComments;
+    private final Map<String, List<?>> metadata = new HashMap<>();
 
     public ConfigurationPath(Object data) {
         this.data = data;
-        this.comments = new ArrayList<>();
-        this.inlineComments = new ArrayList<>();
-    }
-
-    public ConfigurationPath(Object data, List<?> comments, List<?> inlineComments) {
-        this.data = data;
-        this.comments = comments;
-        this.inlineComments = inlineComments;
     }
 }

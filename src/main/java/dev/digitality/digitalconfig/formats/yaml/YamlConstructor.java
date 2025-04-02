@@ -53,8 +53,8 @@ public class YamlConstructor extends SafeConstructor {
         private ConfigurationSection constructConfigurationSection(Node node) {
             MappingNode rootNode = (MappingNode) node;
             ConfigurationSection root = new ConfigurationSection();
-            root.setHeaderComments(rootNode.getBlockComments());
-            root.setFooterComments(rootNode.getEndComments());
+            root.getMetadata().put("yaml.header_comments", rootNode.getBlockComments());
+            root.getMetadata().put("yaml.footer_comments", rootNode.getEndComments());
 
             flattenMapping(rootNode);
             for (NodeTuple nodeTuple : rootNode.getValue()) {
@@ -64,8 +64,11 @@ public class YamlConstructor extends SafeConstructor {
                 while (value instanceof AnchorNode)
                     value = ((AnchorNode) value).getRealNode();
 
-                ConfigurationPath path = new ConfigurationPath(constructObject(value), key.getBlockComments(), value instanceof ScalarNode ? value.getInLineComments() : key.getInLineComments());
-                root.set(String.valueOf(constructObject(key)), path);
+                ConfigurationPath path = new ConfigurationPath(constructObject(value));
+                path.getMetadata().put("yaml.block_comments", key.getBlockComments());
+                path.getMetadata().put("yaml.inline_comments", value instanceof ScalarNode ? value.getInLineComments() : key.getInLineComments());
+
+                root.getData().put(String.valueOf(constructObject(key)), path);
             }
 
             return root;

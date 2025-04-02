@@ -116,8 +116,7 @@ public class Configuration extends ConfigurationSection {
             ConfigurationSection config = format.deserialize(Files.readString(path, StandardCharsets.UTF_8));
 
             this.setData(config.getData());
-            this.setHeaderComments(config.getHeaderComments());
-            this.setFooterComments(config.getFooterComments());
+            this.setMetadata(config.getMetadata());
         } catch (IOException e) {
             DigitalConfig.LOGGER.error("Failed to load config at {}!", path, e);
         }

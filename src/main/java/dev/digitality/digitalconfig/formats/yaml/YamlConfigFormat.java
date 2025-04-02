@@ -17,6 +17,8 @@ public class YamlConfigFormat implements IConfigFormat {
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setIndent(4);
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
+        dumperOptions.setNonPrintableStyle(DumperOptions.NonPrintableStyle.ESCAPE);
         dumperOptions.setPrettyFlow(true);
         dumperOptions.setProcessComments(true);
         YamlRepresenter representer = new YamlRepresenter(dumperOptions);

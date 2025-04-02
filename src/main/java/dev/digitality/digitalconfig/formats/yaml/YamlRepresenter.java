@@ -39,18 +39,26 @@ public class YamlRepresenter extends Representer {
                 Node key = representObject(entry.getKey());
                 Node value = representObject(entry.getValue().getData());
 
-                key.setBlockComments((List<CommentLine>) entry.getValue().getComments());
-                if (value instanceof ScalarNode)
-                    value.setInLineComments((List<CommentLine>) entry.getValue().getInlineComments());
-                else
-                    key.setInLineComments((List<CommentLine>) entry.getValue().getInlineComments());
+                if (entry.getValue().getMetadata().containsKey("yaml.block_comments"))
+                    key.setBlockComments((List<CommentLine>) entry.getValue().getMetadata().get("yaml.block_comments"));
+
+                if (entry.getValue().getMetadata().containsKey("yaml.inline_comments")) {
+                    List<CommentLine> inlineComments = (List<CommentLine>) entry.getValue().getMetadata().get("yaml.inline_comments");
+
+                    if (value instanceof ScalarNode)
+                        value.setInLineComments(inlineComments);
+                    else
+                        key.setInLineComments(inlineComments);
+                }
 
                 nodeTuples.add(new NodeTuple(key, value));
             }
 
             MappingNode node = new MappingNode(Tag.MAP, nodeTuples, DumperOptions.FlowStyle.BLOCK);
-            node.setBlockComments((List<CommentLine>) section.getHeaderComments());
-            node.setEndComments((List<CommentLine>) section.getFooterComments());
+            if (section.getMetadata().containsKey("yaml.header_comments"))
+                node.setBlockComments((List<CommentLine>) section.getMetadata().get("yaml.header_comments"));
+            if (section.getMetadata().containsKey("yaml.footer_comments"))
+                node.setEndComments((List<CommentLine>) section.getMetadata().get("yaml.footer_comments"));
 
             return node;
         }
