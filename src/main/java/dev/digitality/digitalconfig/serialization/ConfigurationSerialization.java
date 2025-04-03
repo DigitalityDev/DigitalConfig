@@ -6,16 +6,15 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class ConfigurationSerialization {
     public static final String SERIALIZED_KEY = "==";
+    private static final Reflections reflections = new Reflections();
     private static final Map<String, Class<?>> aliases = new HashMap<>();
 
     static {
-        registerAliases();
+        registerClasses();
     }
 
     public static boolean isSerializable(Object obj) {
@@ -52,7 +51,11 @@ public class ConfigurationSerialization {
 
         try {
             String alias = String.valueOf(args.get(SERIALIZED_KEY));
-            Class<?> clazz = getClassByName(alias);
+            Class<?> clazz = aliases.get(alias);
+
+            if (clazz == null) {
+                throw new IllegalArgumentException(alias + " is not a valid ConfigurationSerializable!");
+            }
 
             Method deserializeMethod = getMethod(clazz, "deserialize");
             if (deserializeMethod != null)
@@ -67,7 +70,7 @@ public class ConfigurationSerialization {
                 return Optional.of(constructor.newInstance(args));
         } catch (InvocationTargetException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException ignored) {}
+        }
 
         return Optional.empty();
     }
@@ -88,36 +91,58 @@ public class ConfigurationSerialization {
         }
     }
 
-    private static void registerAliases() {
-        Reflections reflections = new Reflections();
-
-        reflections.getTypesAnnotatedWith(SerializableAs.class).forEach(c -> {
-            aliases.put(c.getAnnotation(SerializableAs.class).value(), c);
-        });
-
+    private static void registerClasses() {
+        Set<Class<?>> classes = new HashSet<>(reflections.getSubTypesOf(ConfigurationSerializable.class));
         try {
-            Class<? extends Annotation> bukkitClass = (Class<? extends Annotation>) Class.forName("org.bukkit.configuration.serialization.SerializableAs");
-            Method valueMethod = bukkitClass.getMethod("value");
+            Class<?> bukkitClass = Class.forName("org.bukkit.configuration.serialization.ConfigurationSerializable");
+            classes.addAll(reflections.getSubTypesOf(bukkitClass));
+        } catch (ClassNotFoundException ignored) {}
 
-            for (Class<?> c : reflections.getTypesAnnotatedWith(bukkitClass))
-                aliases.put((String) valueMethod.invoke(c.getAnnotation(bukkitClass)), c);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {}
-    }
+        classes.forEach((clazz) -> {
+            Object delegate = getAnnotationValue(clazz, DelegateDeserialization.class);
 
-    private static Class<?> getClassByName(String name) throws ClassNotFoundException {
-        if (aliases.containsKey(name))
-            return aliases.get(name);
-
-        return Class.forName(name);
+            if (delegate == null) {
+                aliases.put(getAlias(clazz), clazz);
+                aliases.put(clazz.getName(), clazz);
+            }
+        });
     }
 
     private static String getAlias(Class<?> clazz) {
-        return aliases
-                .entrySet()
-                .stream()
-                .filter(e -> clazz == e.getValue())
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .orElseGet(clazz::getName);
+        Object delegate = getAnnotationValue(clazz, DelegateDeserialization.class);
+
+        if (delegate != null) {
+            return getAlias((Class<?>) delegate);
+        }
+
+        Object alias = getAnnotationValue(clazz, SerializableAs.class);
+
+        if (alias != null) {
+            return (String) alias;
+        }
+
+        return clazz.getName();
+    }
+
+    private static Object getAnnotationValue(Class<?> clazz, Class<? extends Annotation> annotationClass) {
+        Annotation annotation = clazz.getAnnotation(annotationClass);
+
+        try {
+            if (annotation == null) {
+                Class<? extends Annotation> bukkitClass = (Class<? extends Annotation>) Class.forName("org.bukkit.configuration.serialization." + annotationClass.getSimpleName());
+
+                if (clazz.getAnnotation(bukkitClass) == null) {
+                    return null;
+                }
+
+                annotation = clazz.getAnnotation(bukkitClass);
+            }
+
+            Method valueMethod = annotation.getClass().getMethod("value");
+            return valueMethod.invoke(annotation);
+        } catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException |
+                 IllegalAccessException ignored) {}
+
+        return null;
     }
 }
