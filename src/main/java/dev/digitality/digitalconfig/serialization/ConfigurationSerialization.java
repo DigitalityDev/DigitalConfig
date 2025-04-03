@@ -4,6 +4,7 @@ import org.reflections.Reflections;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -37,7 +38,9 @@ public class ConfigurationSerialization {
         result.put(SERIALIZED_KEY, getAlias(obj.getClass()));
 
         try {
-            result.putAll((Map<String, Object>) obj.getClass().getMethod("serialize").invoke(obj));
+            Method method = obj.getClass().getMethod("serialize");
+            method.setAccessible(true);
+            result.putAll((Map<String, Object>) method.invoke(obj));
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
@@ -77,7 +80,9 @@ public class ConfigurationSerialization {
 
     private static Method getMethod(Class<?> clazz, String methodName) {
         try {
-            return clazz.getDeclaredMethod(methodName, Map.class);
+            Method method = clazz.getDeclaredMethod(methodName, Map.class);
+            method.setAccessible(true);
+            return method;
         } catch (NoSuchMethodException | SecurityException ex) {
             return null;
         }
@@ -85,7 +90,9 @@ public class ConfigurationSerialization {
 
     private static Constructor<?> getConstructor(Class<?> clazz) {
         try {
-            return clazz.getConstructor(Map.class);
+            Constructor<?> constructor = clazz.getConstructor(Map.class);
+            constructor.setAccessible(true);
+            return constructor;
         } catch (NoSuchMethodException | SecurityException ex) {
             return null;
         }
@@ -96,16 +103,24 @@ public class ConfigurationSerialization {
         try {
             Class<?> bukkitClass = Class.forName("org.bukkit.configuration.serialization.ConfigurationSerializable");
             classes.addAll(reflections.getSubTypesOf(bukkitClass));
-        } catch (ClassNotFoundException ignored) {}
 
-        classes.forEach((clazz) -> {
-            Object delegate = getAnnotationValue(clazz, DelegateDeserialization.class);
+            Class<?> serializationClass = Class.forName("org.bukkit.configuration.serialization.ConfigurationSerialization");
+            Field field = serializationClass.getDeclaredField("aliases");
+            field.setAccessible(true);
 
-            if (delegate == null) {
-                aliases.put(getAlias(clazz), clazz);
-                aliases.put(clazz.getName(), clazz);
-            }
-        });
+            aliases.putAll((Map<String, Class<?>>) field.get(null));
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException ignored) {}
+
+        classes.forEach(ConfigurationSerialization::registerClass);
+    }
+
+    public static void registerClass(Class<?> clazz) {
+        Object delegate = getAnnotationValue(clazz, DelegateDeserialization.class);
+
+        if (delegate == null) {
+            aliases.put(getAlias(clazz), clazz);
+            aliases.put(clazz.getName(), clazz);
+        }
     }
 
     private static String getAlias(Class<?> clazz) {
@@ -139,6 +154,7 @@ public class ConfigurationSerialization {
             }
 
             Method valueMethod = annotation.getClass().getMethod("value");
+            valueMethod.setAccessible(true);
             return valueMethod.invoke(annotation);
         } catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException |
                  IllegalAccessException ignored) {}
