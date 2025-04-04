@@ -76,7 +76,7 @@ public class ConfigurationSection {
             }
         }
 
-        DigitalConfig.LOGGER.error("Section %s was not found in path %s.".formatted(path, fullPath));
+        DigitalConfig.LOGGER.warn("Section {} was not found in path {}.", path, fullPath);
         return null;
     }
 
@@ -136,6 +136,10 @@ public class ConfigurationSection {
 
     public List<String> getKeys() {
         return new ArrayList<>(data.keySet());
+    }
+
+    public boolean hasKey(String path) {
+        return get(path, Object.class) != null;
     }
 
     @Override
