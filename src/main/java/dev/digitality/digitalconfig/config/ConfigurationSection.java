@@ -104,23 +104,23 @@ public class ConfigurationSection {
         return get(path, String.class);
     }
 
-    public boolean getBoolean(String path) {
+    public Boolean getBoolean(String path) {
         return get(path, Boolean.class);
     }
 
-    public int getInt(String path) {
+    public Integer getInt(String path) {
         return get(path, Integer.class);
     }
 
-    public long getLong(String path) {
+    public Long getLong(String path) {
         return get(path, Long.class);
     }
 
-    public float getFloat(String path) {
+    public Float getFloat(String path) {
         return get(path, Float.class);
     }
 
-    public double getDouble(String path) {
+    public Double getDouble(String path) {
         return get(path, Double.class);
     }
 
