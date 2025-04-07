@@ -51,7 +51,7 @@ public class TOMLConfigFormat implements IConfigFormat {
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (entry.getValue() instanceof Map) {
-                section.set(entry.getKey(), fromMap((Map<String, Object>) entry.getValue()));
+                section.getData().put(entry.getKey(), new ConfigurationPath(fromMap((Map<String, Object>) entry.getValue())));
             } else if (entry.getValue() instanceof Iterable) {
                 List<Object> listSection = new ArrayList<>();
 
@@ -63,9 +63,9 @@ public class TOMLConfigFormat implements IConfigFormat {
                     }
                 }
 
-                section.set(entry.getKey(), listSection);
+                section.getData().put(entry.getKey(), new ConfigurationPath(listSection));
             } else {
-                section.set(entry.getKey(), entry.getValue());
+                section.getData().put(entry.getKey(), new ConfigurationPath(entry.getValue()));
             }
         }
 
