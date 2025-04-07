@@ -67,7 +67,7 @@ public class JsonConfigFormat implements IConfigFormat {
         for (Map.Entry<String, JsonElement> entry : jsonObject.asMap().entrySet()) {
             JsonElement element = entry.getValue();
 
-            section.set(entry.getKey(), fromJsonElement(element));
+            section.getData().put(entry.getKey(), new ConfigurationPath(fromJsonElement(element)));
         }
 
         return section;
