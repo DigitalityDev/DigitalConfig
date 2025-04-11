@@ -1,17 +1,16 @@
 package dev.digitality.digitalconfig.serialization;
 
-import org.reflections.Reflections;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class ConfigurationSerialization {
     public static final String SERIALIZED_KEY = "==";
-    private static final Reflections reflections = new Reflections();
     private static final Map<String, Class<?>> aliases = new HashMap<>();
 
     static {
@@ -99,19 +98,13 @@ public class ConfigurationSerialization {
     }
 
     private static void registerClasses() {
-        Set<Class<?>> classes = new HashSet<>(reflections.getSubTypesOf(ConfigurationSerializable.class));
         try {
-            Class<?> bukkitClass = Class.forName("org.bukkit.configuration.serialization.ConfigurationSerializable");
-            classes.addAll(reflections.getSubTypesOf(bukkitClass));
-
             Class<?> serializationClass = Class.forName("org.bukkit.configuration.serialization.ConfigurationSerialization");
             Field field = serializationClass.getDeclaredField("aliases");
             field.setAccessible(true);
 
             aliases.putAll((Map<String, Class<?>>) field.get(null));
         } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException ignored) {}
-
-        classes.forEach(ConfigurationSerialization::registerClass);
     }
 
     public static void registerClass(Class<?> clazz) {
