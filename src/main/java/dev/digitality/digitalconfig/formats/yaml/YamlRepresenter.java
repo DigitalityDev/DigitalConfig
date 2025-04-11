@@ -22,7 +22,6 @@ public class YamlRepresenter extends Representer {
         try {
             this.multiRepresenters.put(Class.forName("org.bukkit.configuration.serialization.ConfigurationSerializable"), new RepresentConfigurationSerializable());
         } catch (ClassNotFoundException ignored) {}
-        this.multiRepresenters.remove(Enum.class);
     }
 
     public Node representObject(Object data) {

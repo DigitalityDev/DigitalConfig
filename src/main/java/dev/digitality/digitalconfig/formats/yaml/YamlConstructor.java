@@ -4,7 +4,7 @@ import dev.digitality.digitalconfig.config.ConfigurationPath;
 import dev.digitality.digitalconfig.config.ConfigurationSection;
 import dev.digitality.digitalconfig.serialization.ConfigurationSerialization;
 import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.*;
 
@@ -12,7 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class YamlConstructor extends SafeConstructor {
+public class YamlConstructor extends Constructor {
     public YamlConstructor(LoaderOptions loaderOptions) {
         super(loaderOptions);
 
