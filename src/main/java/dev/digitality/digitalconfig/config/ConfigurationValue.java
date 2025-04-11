@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class ConfigurationPath {
+public class ConfigurationValue {
     private Object data;
     private final Map<String, List<?>> metadata = new HashMap<>();
 
-    public ConfigurationPath(Object data) {
+    public ConfigurationValue(Object data) {
         this.data = data;
     }
 }

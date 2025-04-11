@@ -1,7 +1,7 @@
 package dev.digitality.digitalconfig.formats.properties;
 
-import dev.digitality.digitalconfig.config.ConfigurationPath;
 import dev.digitality.digitalconfig.config.ConfigurationSection;
+import dev.digitality.digitalconfig.config.ConfigurationValue;
 import dev.digitality.digitalconfig.formats.IConfigFormat;
 import org.codejive.properties.Properties;
 
@@ -19,7 +19,7 @@ public class PropertiesConfigFormat implements IConfigFormat {
         ConfigurationSection section = new ConfigurationSection();
 
         for (String key : properties.stringPropertyNames()) {
-            ConfigurationPath path = new ConfigurationPath(properties.getProperty(key));
+            ConfigurationValue path = new ConfigurationValue(properties.getProperty(key));
             path.getMetadata().put("properties.comments", properties.getComment(key));
 
             section.getData().put(key, path);
@@ -32,9 +32,9 @@ public class PropertiesConfigFormat implements IConfigFormat {
     public String serialize(ConfigurationSection section) throws IOException {
         Properties properties = new Properties();
 
-        for (Map.Entry<String, ConfigurationPath> entry : section.getData().entrySet()) {
+        for (Map.Entry<String, ConfigurationValue> entry : section.getData().entrySet()) {
             String key = entry.getKey();
-            ConfigurationPath value = entry.getValue();
+            ConfigurationValue value = entry.getValue();
 
             properties.setProperty(key, String.valueOf(value.getData()));
             if (value.getMetadata().containsKey("properties.comments")) {

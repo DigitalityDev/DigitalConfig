@@ -1,7 +1,7 @@
 package dev.digitality.digitalconfig.formats.yaml;
 
-import dev.digitality.digitalconfig.config.ConfigurationPath;
 import dev.digitality.digitalconfig.config.ConfigurationSection;
+import dev.digitality.digitalconfig.config.ConfigurationValue;
 import dev.digitality.digitalconfig.serialization.ConfigurationSerializable;
 import dev.digitality.digitalconfig.serialization.ConfigurationSerialization;
 import org.yaml.snakeyaml.DumperOptions;
@@ -34,7 +34,7 @@ public class YamlRepresenter extends Representer {
             ConfigurationSection section = (ConfigurationSection) data;
             List<NodeTuple> nodeTuples = new ArrayList<>();
 
-            for (Map.Entry<String, ConfigurationPath> entry : section.getData().entrySet()) {
+            for (Map.Entry<String, ConfigurationValue> entry : section.getData().entrySet()) {
                 Node key = representObject(entry.getKey());
                 Node value = representObject(entry.getValue().getData());
 

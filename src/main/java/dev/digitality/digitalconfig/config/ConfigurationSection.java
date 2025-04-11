@@ -9,19 +9,19 @@ import java.util.*;
 @Getter
 @Setter
 public class ConfigurationSection {
-    private Map<String, ConfigurationPath> data = new LinkedHashMap<>();
+    private Map<String, ConfigurationValue> data = new LinkedHashMap<>();
     private Map<String, List<?>> metadata = new HashMap<>();
 
-    public void set(String path, ConfigurationPath value) {
+    public void set(String path, ConfigurationValue value) {
         if (value == null) {
-            value = new ConfigurationPath(null);
+            value = new ConfigurationValue(null);
         }
 
         String[] parts = path.split("\\.");
-        Map<String, ConfigurationPath> currentMap = data;
+        Map<String, ConfigurationValue> currentMap = data;
 
         for (int i = 0; i < parts.length - 1; i++) {
-            Object data = currentMap.computeIfAbsent(parts[i], k -> new ConfigurationPath(new ConfigurationSection())).getData();
+            Object data = currentMap.computeIfAbsent(parts[i], k -> new ConfigurationValue(new ConfigurationSection())).getData();
 
             if (!(data instanceof ConfigurationSection section)) {
                 throw new IllegalArgumentException("Section %s of path %s is not a valid configuration section.".formatted(parts[i], path));
@@ -31,7 +31,7 @@ public class ConfigurationSection {
         }
 
         if (currentMap.containsKey(parts[parts.length - 1])) {
-            ConfigurationPath existingValue = currentMap.get(parts[parts.length - 1]);
+            ConfigurationValue existingValue = currentMap.get(parts[parts.length - 1]);
             existingValue.setData(value.getData());
 
             return;
@@ -41,10 +41,10 @@ public class ConfigurationSection {
     }
 
     public void set(String path, Object value) {
-        set(path, new ConfigurationPath(value));
+        set(path, new ConfigurationValue(value));
     }
 
-    private <T> T get(String fullPath, String path, Class<T> type, Map<String, ConfigurationPath> currentMap) {
+    private <T> T get(String fullPath, String path, Class<T> type, Map<String, ConfigurationValue> currentMap) {
         if (currentMap.containsKey(path)) {
             return castData(fullPath, path, currentMap.get(path).getData(), type);
         }
@@ -129,6 +129,8 @@ public class ConfigurationSection {
 
         if (data != null && !data.isEmpty() && data.getFirst() instanceof String) {
             return (List<String>) data;
+        } else if (data == null) {
+            return null;
         }
 
         throw new IllegalArgumentException("Value at path %s is not of type List<String>.".formatted(path));

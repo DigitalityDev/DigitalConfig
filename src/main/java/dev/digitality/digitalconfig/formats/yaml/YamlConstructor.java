@@ -1,7 +1,7 @@
 package dev.digitality.digitalconfig.formats.yaml;
 
-import dev.digitality.digitalconfig.config.ConfigurationPath;
 import dev.digitality.digitalconfig.config.ConfigurationSection;
+import dev.digitality.digitalconfig.config.ConfigurationValue;
 import dev.digitality.digitalconfig.serialization.ConfigurationSerialization;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -44,10 +44,27 @@ public class YamlConstructor extends Constructor {
 
             Map<String, Object> typed = new LinkedHashMap<>(raw.size());
             for (Map.Entry<?, ?> entry : raw.entrySet()) {
-                typed.put(String.valueOf(entry.getKey()), entry.getValue());
+                if (entry.getValue() instanceof ConfigurationSection section) {
+                    typed.put(String.valueOf(entry.getKey()), unwrapSection(section));
+                } else {
+                    typed.put(String.valueOf(entry.getKey()), entry.getValue());
+                }
             }
 
             return ConfigurationSerialization.deserialize(typed);
+        }
+
+        private Map<String, Object> unwrapSection(ConfigurationSection section) {
+            Map<String, Object> map = new LinkedHashMap<>();
+
+            for (Map.Entry<String, ConfigurationValue> entry : section.getData().entrySet()) {
+                if (entry.getValue().getData() instanceof ConfigurationSection)
+                    map.put(entry.getKey(), unwrapSection((ConfigurationSection) entry.getValue().getData()));
+                else
+                    map.put(entry.getKey(), entry.getValue().getData());
+            }
+
+            return map;
         }
 
         private ConfigurationSection constructConfigurationSection(Node node) {
@@ -64,7 +81,7 @@ public class YamlConstructor extends Constructor {
                 while (value instanceof AnchorNode)
                     value = ((AnchorNode) value).getRealNode();
 
-                ConfigurationPath path = new ConfigurationPath(constructObject(value));
+                ConfigurationValue path = new ConfigurationValue(constructObject(value));
                 path.getMetadata().put("yaml.block_comments", key.getBlockComments());
                 path.getMetadata().put("yaml.inline_comments", value instanceof ScalarNode ? value.getInLineComments() : key.getInLineComments());
 

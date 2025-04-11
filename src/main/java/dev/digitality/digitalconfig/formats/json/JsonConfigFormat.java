@@ -1,8 +1,8 @@
 package dev.digitality.digitalconfig.formats.json;
 
 import com.google.gson.*;
-import dev.digitality.digitalconfig.config.ConfigurationPath;
 import dev.digitality.digitalconfig.config.ConfigurationSection;
+import dev.digitality.digitalconfig.config.ConfigurationValue;
 import dev.digitality.digitalconfig.formats.IConfigFormat;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class JsonConfigFormat implements IConfigFormat {
     private Map<String, Object> toMap(ConfigurationSection section) {
         Map<String, Object> map = new LinkedHashMap<>();
 
-        for (Map.Entry<String, ConfigurationPath> entry : section.getData().entrySet()) {
+        for (Map.Entry<String, ConfigurationValue> entry : section.getData().entrySet()) {
             Object data = entry.getValue().getData();
 
             if (data instanceof ConfigurationSection) {
@@ -67,7 +67,7 @@ public class JsonConfigFormat implements IConfigFormat {
         for (Map.Entry<String, JsonElement> entry : jsonObject.asMap().entrySet()) {
             JsonElement element = entry.getValue();
 
-            section.getData().put(entry.getKey(), new ConfigurationPath(fromJsonElement(element)));
+            section.getData().put(entry.getKey(), new ConfigurationValue(fromJsonElement(element)));
         }
 
         return section;

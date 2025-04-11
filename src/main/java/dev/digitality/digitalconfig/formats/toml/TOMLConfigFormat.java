@@ -2,8 +2,8 @@ package dev.digitality.digitalconfig.formats.toml;
 
 import com.moandjiezana.toml.Toml;
 import com.moandjiezana.toml.TomlWriter;
-import dev.digitality.digitalconfig.config.ConfigurationPath;
 import dev.digitality.digitalconfig.config.ConfigurationSection;
+import dev.digitality.digitalconfig.config.ConfigurationValue;
 import dev.digitality.digitalconfig.formats.IConfigFormat;
 
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class TOMLConfigFormat implements IConfigFormat {
     private Map<String, Object> toMap(ConfigurationSection section) {
         Map<String, Object> map = new LinkedHashMap<>();
 
-        for (Map.Entry<String, ConfigurationPath> entry : section.getData().entrySet()) {
+        for (Map.Entry<String, ConfigurationValue> entry : section.getData().entrySet()) {
             Object data = entry.getValue().getData();
 
             if (data instanceof ConfigurationSection) {
@@ -51,7 +51,7 @@ public class TOMLConfigFormat implements IConfigFormat {
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (entry.getValue() instanceof Map) {
-                section.getData().put(entry.getKey(), new ConfigurationPath(fromMap((Map<String, Object>) entry.getValue())));
+                section.getData().put(entry.getKey(), new ConfigurationValue(fromMap((Map<String, Object>) entry.getValue())));
             } else if (entry.getValue() instanceof Iterable) {
                 List<Object> listSection = new ArrayList<>();
 
@@ -63,9 +63,9 @@ public class TOMLConfigFormat implements IConfigFormat {
                     }
                 }
 
-                section.getData().put(entry.getKey(), new ConfigurationPath(listSection));
+                section.getData().put(entry.getKey(), new ConfigurationValue(listSection));
             } else {
-                section.getData().put(entry.getKey(), new ConfigurationPath(entry.getValue()));
+                section.getData().put(entry.getKey(), new ConfigurationValue(entry.getValue()));
             }
         }
 
