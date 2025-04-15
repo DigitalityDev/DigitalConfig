@@ -47,6 +47,7 @@ tasks {
         relocate("com.moandjiezana.toml", "dev.digitality.digitalconfig.formats.toml.toml4j")
 
         archiveFileName = "${project.name}.jar"
+        archiveClassifier = null
     }
 
     register("sourceJar", Jar::class) {
@@ -59,7 +60,7 @@ tasks {
 publishing {
     repositories {
         maven {
-            url = uri("https://repo.gold-zone.cz/private")
+            url = uri("https://repo.gold-zone.cz/releases")
 
             credentials {
                 username = (project.findProperty("goldzoneRepo.username") ?: System.getenv("GOLDZONE_REPO_USERNAME")) as String?
