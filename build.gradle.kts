@@ -3,12 +3,12 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     id("java-library")
     id("maven-publish")
-    id("com.gradleup.shadow") version "8.3.6"
+    id("com.gradleup.shadow") version "9.4.0"
 }
 
 group = "dev.digitality"
 description = "DigitalConfig"
-version = "1.2.0"
+version = "1.3.0"
 
 java.toolchain {
     languageVersion = JavaLanguageVersion.of(21)
@@ -27,8 +27,8 @@ dependencies {
     implementation("org.codejive:java-properties:0.0.6")
     implementation("com.moandjiezana.toml:toml4j:0.7.2")
 
-    compileOnly("org.projectlombok:lombok:1.18.36")
-    annotationProcessor("org.projectlombok:lombok:1.18.36")
+    compileOnly("org.projectlombok:lombok:1.18.44")
+    annotationProcessor("org.projectlombok:lombok:1.18.44")
 }
 
 tasks {
@@ -60,11 +60,11 @@ tasks {
 publishing {
     repositories {
         maven {
-            url = uri("https://repo.gold-zone.cz/releases")
+            url = uri("https://maven.digitality.dev/releases")
 
             credentials {
-                username = (project.findProperty("goldzoneRepo.username") ?: System.getenv("GOLDZONE_REPO_USERNAME")) as String?
-                password = (project.findProperty("goldzoneRepo.password") ?: System.getenv("GOLDZONE_REPO_PASSWORD")) as String?
+                username = (project.findProperty("digitalityRepo.username") ?: System.getenv("DIGITALITY_REPO_USERNAME")) as String?
+                password = (project.findProperty("digitalityRepo.password") ?: System.getenv("DIGITALITY_REPO_PASSWORD")) as String?
             }
 
             authentication {
