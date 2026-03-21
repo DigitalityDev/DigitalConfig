@@ -36,7 +36,7 @@ If you like our project, please join our [Discord](https://discord.com/invite/rv
 <repositories>
     <repository>
         <id>digitality-repo-releases</id>
-        <url>https://repo.gold-zone.cz/releases</url>
+        <url>https://maven.digitality.dev/releases</url>
     </repository>
 </repositories>
 
@@ -55,7 +55,7 @@ If you like our project, please join our [Discord](https://discord.com/invite/rv
 repositories {
     maven {
         name "digitalityRepoReleases"
-        url "https://repo.gold-zone.cz/releases"
+        url "https://maven.digitality.dev/releases"
     }
 }
 
