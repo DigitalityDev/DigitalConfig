@@ -76,7 +76,10 @@ public class ConfigurationSection {
             }
         }
 
-        DigitalConfig.LOGGER.warn("Section {} was not found in path {}.", path, fullPath);
+        if (DigitalConfig.isDebug()) {
+            DigitalConfig.LOGGER.warn("Section {} was not found in path {}.", path, fullPath);
+        }
+
         return null;
     }
 
@@ -124,16 +127,44 @@ public class ConfigurationSection {
         return get(path, Double.class);
     }
 
-    public List<String> getStringList(String path) {
+    public <T> List<T> getList(String path, Class<T> type) {
         List<?> data = get(path, List.class);
 
-        if (data != null && !data.isEmpty() && data.getFirst() instanceof String) {
-            return (List<String>) data;
+        if (data != null && !data.isEmpty() && type.isInstance(data.getFirst())) {
+            return (List<T>) data;
         } else if (data == null) {
             return null;
         }
 
-        throw new IllegalArgumentException("Value at path %s is not of type List<String>.".formatted(path));
+        throw new IllegalArgumentException("Value at path %s is not of type List<%s>.".formatted(path, type.getName()));
+    }
+
+    public List<String> getStringList(String path) {
+        return getList(path, String.class);
+    }
+
+    public List<Integer> getIntList(String path) {
+        return getList(path, Integer.class);
+    }
+
+    public List<Long> getLongList(String path) {
+        return getList(path, Long.class);
+    }
+
+    public List<Boolean> getBooleanList(String path) {
+        return getList(path, Boolean.class);
+    }
+
+    public List<Float> getFloatList(String path) {
+        return getList(path, Float.class);
+    }
+
+    public List<Double> getDoubleList(String path) {
+        return getList(path, Double.class);
+    }
+
+    public List<ConfigurationSection> getSectionList(String path) {
+        return getList(path, ConfigurationSection.class);
     }
 
     public List<String> getKeys() {

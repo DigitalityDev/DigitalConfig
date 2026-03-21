@@ -8,7 +8,7 @@ plugins {
 
 group = "dev.digitality"
 description = "DigitalConfig"
-version = "1.3.0"
+version = "1.3.1"
 
 java.toolchain {
     languageVersion = JavaLanguageVersion.of(21)
